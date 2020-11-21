@@ -1,6 +1,6 @@
 # Valiu backend challenge
 
-A microservice that takes screenshots of a website given its URL and returns the image’s URL.
+A microservice that takes screenshot of a website given its URL and returns the image’s URL.
 
 # Technologies Used
 
