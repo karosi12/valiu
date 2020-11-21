@@ -10,6 +10,26 @@ A microservice that takes screenshots of a website given its URL and returns the
 - aws-sdk
 - Libaries: Es6, Babel, eslint, supertest, express
 
+##
+
+File storage is digitalocean space
+
+# Digital ocean space credential
+
+- ACCESS_KEYID=
+- SECRET_ACCESS_KEY=
+- SPACE_ENDPOINT=
+- BUCKET=
+
+# env sample
+
+- PORT=4400
+- NODE_ENV=
+- ACCESS_KEYID=
+- SECRET_ACCESS_KEY=
+- SPACE_ENDPOINT=
+- BUCKET=
+
 # Features
 
 - User can a get screenshot image url of a website
