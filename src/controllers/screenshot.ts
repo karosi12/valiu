@@ -1,21 +1,7 @@
 import { Response, Request } from "express";
 import Pageres from "pageres";
-const fs = require("fs");
-const { promisify } = require("util");
-const readFileAsync = promisify(fs.readFile);
-const unlinkAsync = promisify(fs.unlink);
-import * as dotenv from "dotenv";
-
-dotenv.config();
-const AWS = require("aws-sdk");
-const spaceEndpoint = new AWS.Endpoint(process.env.SPACE_ENDPOINT);
-const s3 = new AWS.S3({
-  endpoint: spaceEndpoint,
-  accessKeyId: process.env.ACCESS_KEYID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-});
+import { uploader } from "../helper/content_upload";
 import { Logger } from "../logger/logger";
-import { Config } from "../config/config";
 import { responsesHelper } from "../utils/responses";
 const logging = new Logger();
 const logger = logging.log("screenshot-service");
@@ -29,19 +15,24 @@ class Capturewebsite {
    * @param {Object} res response object
    * @returns {void|Object} object
    */
-  async screenshot(req: Request, res) {
+  async screenshot(req: Request, res: Response) {
     try {
       let { websiteName, url } = req.body;
       websiteName += +new Date();
       await new Pageres({ delay: 2 })
         .src(url, ["1280x1024"], { filename: websiteName })
-        .dest("./uploads")
+        .dest("../src/uploads")
         .run();
+      const result = await uploader.uploadFile(websiteName);
+      if (!result.data)
+        return res.status(400).send(responsesHelper.error(400, result.message));
+      logger.info(`website image uploaded successfully ${result.data}`);
       return res
         .status(201)
-        .send(responsesHelper.success(201, { data: "ok" }, "page captured"));
+        .send(
+          responsesHelper.success(201, { data: result.data }, result.message)
+        );
     } catch (error) {
-      console.log(error);
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
       return res.status(500).send(responsesHelper.error(500, `${error}`));
     }
