@@ -41,7 +41,7 @@ File storage is digitalocean space
 | POST /api/v1/screenshot | Get screenshot image url |
 | GET /                   | API Health               |
 
-[Valiu backend challenge](https://documenter.getpostman.com/view/10646382/TVev44uP)
+[Documentation](https://documenter.getpostman.com/view/10646382/TVev44uP)
 
 # To Install
 
