@@ -5,3 +5,6 @@
 /logs
 todo
 .vscode
+coverage
+.nyc_output
+
