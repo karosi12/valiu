@@ -1,5 +1,4 @@
 import { Response, Request } from "express";
-// import Pageres from "pageres";
 import captureWebsite from "capture-website";
 import { uploader } from "../helper/content_upload";
 import { Logger } from "../logger/logger";
