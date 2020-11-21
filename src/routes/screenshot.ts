@@ -1,6 +1,6 @@
 import * as express from "express";
-import { captureWebsite } from "../controllers/screenshot";
+import { screenShotWebsite } from "../controllers/screenshot";
 const router = express.Router();
 
-router.post("/screenshot", captureWebsite.screenshot);
+router.post("/screenshot", screenShotWebsite.screenshot);
 export const screenshotRoute = router;
