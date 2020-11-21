@@ -32,7 +32,7 @@ File storage is digitalocean space
 
 # Features
 
-- User can a get screenshot image url of a website
+- User can get a screenshot image url of a website
 
 ## API Endpoints
 
