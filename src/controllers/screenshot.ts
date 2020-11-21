@@ -1,12 +1,13 @@
 import { Response, Request } from "express";
-import Pageres from "pageres";
+// import Pageres from "pageres";
+import captureWebsite from "capture-website";
 import { uploader } from "../helper/content_upload";
 import { Logger } from "../logger/logger";
 import { responsesHelper } from "../utils/responses";
 const logging = new Logger();
 const logger = logging.log("screenshot-service");
 
-class Capturewebsite {
+class ScreenShotWebsite {
   /**
    * create
    * @desc users should be able to tak a screenshot of a website and get the image url
@@ -19,10 +20,9 @@ class Capturewebsite {
     try {
       let { websiteName, url } = req.body;
       websiteName += +new Date();
-      await new Pageres({ delay: 2 })
-        .src(url, ["1280x1024"], { filename: websiteName })
-        .dest("../src/uploads")
-        .run();
+      await captureWebsite.file(url, `../src/uploads/${websiteName}.png`, {
+        fullPage: true,
+      });
       const result = await uploader.uploadFile(websiteName);
       if (!result.data)
         return res.status(400).send(responsesHelper.error(400, result.message));
@@ -38,4 +38,4 @@ class Capturewebsite {
     }
   }
 }
-export const captureWebsite = new Capturewebsite();
+export const screenShotWebsite = new ScreenShotWebsite();
