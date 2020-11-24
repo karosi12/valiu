@@ -1,11 +1,11 @@
 import { Response, Request } from "express";
-import captureWebsite from "capture-website";
-import { uploader } from "../helper/content_upload";
+// const puppeteer = require("puppeteer");
+// import { uploader } from "../helper/content_upload";
+import { screenshotRedis } from "../redis";
 import { Logger } from "../logger/logger";
 import { responsesHelper } from "../utils/responses";
 const logging = new Logger();
 const logger = logging.log("screenshot-service");
-
 class ScreenShotWebsite {
   /**
    * create
@@ -17,20 +17,24 @@ class ScreenShotWebsite {
    */
   async screenshot(req: Request, res: Response) {
     try {
-      let { websiteName, url } = req.body;
-      websiteName += +new Date();
-      await captureWebsite.file(url, `../src/uploads/${websiteName}.png`, {
-        fullPage: true,
+      const redisKey = +new Date();
+      const payload = JSON.stringify(req.body);
+      screenshotRedis.set(redisKey, payload);
+      screenshotRedis.get(redisKey, function (error, result) {
+        if (error) {
+          console.log(error);
+          throw error;
+        }
+        return res
+          .status(201)
+          .send(
+            responsesHelper.success(
+              201,
+              JSON.parse(result),
+              "Data sent to queue"
+            )
+          );
       });
-      const result = await uploader.uploadFile(websiteName);
-      if (!result.data)
-        return res.status(400).send(responsesHelper.error(400, result.message));
-      logger.info(`website image uploaded successfully ${result.data}`);
-      return res
-        .status(201)
-        .send(
-          responsesHelper.success(201, { data: result.data }, result.message)
-        );
     } catch (error) {
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
       return res.status(500).send(responsesHelper.error(500, `${error}`));

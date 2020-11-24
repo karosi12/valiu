@@ -20,7 +20,7 @@ const screenShotJoi = async (req, res, next) => {
 
 const screenShotSchema = Joi.object().keys({
   websiteName: Joi.string().required(),
-  url: Joi.string().uri().required(),
+  uri: Joi.string().uri().required(),
 });
 
 export default { screenShotJoi };

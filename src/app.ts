@@ -4,6 +4,8 @@ import cors from "cors";
 import { Logger } from "./logger/logger";
 import express, { Application, Request, Response } from "express";
 import { screenshotRoute } from "./routes/screenshot";
+import { screenshotJob } from "./job";
+import { screenshotRedis } from "./redis";
 const API_VERSION = "/api/v1";
 const app: Application = express();
 dotenv.config();
@@ -17,6 +19,8 @@ app.use(
   })
 );
 app.use(cors());
+// screenshotJob
+screenshotRedis;
 app.use(API_VERSION, screenshotRoute);
 app.get("/", (req: Request, res: Response) => {
   return res.status(200).send({ message: "API is running fine" });
