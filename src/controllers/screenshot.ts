@@ -6,7 +6,9 @@ const logging = new Logger();
 const logger = logging.log("screenshot-service");
 const CONN_URL = "amqp://localhost";
 declare const Buffer;
-let ch = null;
+let ch: {
+  sendToQueue(queueName, payload);
+};
 amqp.connect(CONN_URL, function (err, conn) {
   conn.createChannel(function (err, channel) {
     ch = channel;
