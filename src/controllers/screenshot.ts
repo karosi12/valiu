@@ -1,11 +1,19 @@
 import { Response, Request } from "express";
-import captureWebsite from "capture-website";
-import { uploader } from "../helper/content_upload";
+import amqp from "amqplib/callback_api";
 import { Logger } from "../logger/logger";
 import { responsesHelper } from "../utils/responses";
 const logging = new Logger();
 const logger = logging.log("screenshot-service");
-
+const CONN_URL = "amqp://localhost";
+declare const Buffer;
+let ch: {
+  sendToQueue(queueName, payload);
+};
+amqp.connect(CONN_URL, function (err, conn) {
+  conn.createChannel(function (err, channel) {
+    ch = channel;
+  });
+});
 class ScreenShotWebsite {
   /**
    * create
@@ -15,23 +23,18 @@ class ScreenShotWebsite {
    * @param {Object} res response object
    * @returns {void|Object} object
    */
+
   async screenshot(req: Request, res: Response) {
     try {
-      let { websiteName, url } = req.body;
-      websiteName += +new Date();
-      await captureWebsite.file(url, `../src/uploads/${websiteName}.png`, {
-        fullPage: true,
-      });
-      const result = await uploader.uploadFile(websiteName);
-      if (!result.data)
-        return res.status(400).send(responsesHelper.error(400, result.message));
-      logger.info(`website image uploaded successfully ${result.data}`);
+      const flag = "screenshot-messages";
+      const payload = JSON.stringify(req.body);
+      ch.sendToQueue(flag, Buffer.from(payload));
+
       return res
         .status(201)
-        .send(
-          responsesHelper.success(201, { data: result.data }, result.message)
-        );
+        .send(responsesHelper.success(201, req.body, "Data sent"));
     } catch (error) {
+      console.log(error);
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
       return res.status(500).send(responsesHelper.error(500, `${error}`));
     }
