@@ -28,11 +28,15 @@ class ScreenShotWebsite {
     try {
       const flag = "screenshot-messages";
       const payload = JSON.stringify(req.body);
-      ch.sendToQueue(flag, Buffer.from(payload));
-
+      const response = ch.sendToQueue(flag, Buffer.from(payload));
+      logger.info(`payload => ${JSON.stringify(req.body)}`);
+      if (response)
+        return res
+          .status(201)
+          .send(responsesHelper.success(201, req.body, "Data sent"));
       return res
-        .status(201)
-        .send(responsesHelper.success(201, req.body, "Data sent"));
+        .status(400)
+        .send(responsesHelper.error(400, "Request not resolved"));
     } catch (error) {
       console.log(error);
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
