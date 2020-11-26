@@ -7,7 +7,8 @@ const logger = logging.log("screenshot-service");
 const CONN_URL = "amqp://localhost";
 declare const Buffer;
 let ch: {
-  sendToQueue(queueName, payload);
+  assertQueue(queueName, {});
+  sendToQueue(queueName, payload, {});
 };
 amqp.connect(CONN_URL, function (err, conn) {
   conn.createChannel(function (err, channel) {
@@ -26,9 +27,14 @@ class ScreenShotWebsite {
 
   async screenshot(req: Request, res: Response) {
     try {
-      const flag = "screenshot-messages";
+      const queue = "screenshot-messages";
       const payload = JSON.stringify(req.body);
-      const response = ch.sendToQueue(flag, Buffer.from(payload));
+      ch.assertQueue(queue, {
+        durable: true,
+      });
+      const response = ch.sendToQueue(queue, Buffer.from(payload), {
+        persistent: true,
+      });
       logger.info(`payload => ${JSON.stringify(req.body)}`);
       if (response)
         return res
