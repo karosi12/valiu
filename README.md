@@ -6,29 +6,8 @@ A microservice that takes screenshot of a website given its URL and returns the 
 
 - Backend: Node/Express
 - typescript
-- capture-website
-- aws-sdk
+- amqplib(Rabbitmq)
 - Libaries: Es6, Babel, eslint, supertest, express
-
-##
-
-File storage is digitalocean space
-
-# Digital ocean space credential
-
-- ACCESS_KEYID=
-- SECRET_ACCESS_KEY=
-- SPACE_ENDPOINT=
-- BUCKET=
-
-# env sample
-
-- PORT=4400
-- NODE_ENV=
-- ACCESS_KEYID=
-- SECRET_ACCESS_KEY=
-- SPACE_ENDPOINT=
-- BUCKET=
 
 # Features
 
