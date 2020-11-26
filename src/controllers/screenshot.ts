@@ -8,6 +8,7 @@ const CONN_URL = "amqp://localhost";
 declare const Buffer;
 let ch: {
   assertQueue(queueName, {});
+  consume(queue: string, callback: Function);
   sendToQueue(queueName, payload, {});
 };
 amqp.connect(CONN_URL, function (err, conn) {
@@ -28,6 +29,7 @@ class ScreenShotWebsite {
   async screenshot(req: Request, res: Response) {
     try {
       const queue = "screenshot-messages";
+      const Recievequeue = "recieve-screenshot";
       const payload = JSON.stringify(req.body);
       ch.assertQueue(queue, {
         durable: true,
@@ -36,13 +38,16 @@ class ScreenShotWebsite {
         persistent: true,
       });
       logger.info(`payload => ${JSON.stringify(req.body)}`);
-      if (response)
+      ch.consume(Recievequeue, async function (msg) {
+        const { uri } = JSON.parse(msg.content.toString());
+        if (response)
+          return res
+            .status(201)
+            .send(responsesHelper.success(201, { data: uri }, "success"));
         return res
-          .status(201)
-          .send(responsesHelper.success(201, req.body, "Data sent"));
-      return res
-        .status(400)
-        .send(responsesHelper.error(400, "Request not resolved"));
+          .status(400)
+          .send(responsesHelper.error(400, "Request not resolved"));
+      });
     } catch (error) {
       console.log(error);
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
