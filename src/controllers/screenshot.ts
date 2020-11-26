@@ -29,7 +29,7 @@ class ScreenShotWebsite {
   async screenshot(req: Request, res: Response) {
     try {
       const queue = "screenshot-messages";
-      const Recievequeue = "recieve-screenshot";
+      const recieveQueue = "recieve-screenshot";
       const payload = JSON.stringify(req.body);
       ch.assertQueue(queue, {
         durable: true,
@@ -38,7 +38,7 @@ class ScreenShotWebsite {
         persistent: true,
       });
       logger.info(`payload => ${JSON.stringify(req.body)}`);
-      ch.consume(Recievequeue, async function (msg) {
+      ch.consume(recieveQueue, async function (msg) {
         const { uri } = JSON.parse(msg.content.toString());
         if (response)
           return res
