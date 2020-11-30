@@ -1,11 +1,17 @@
 import { Response, Request } from "express";
 import amqp from "amqplib/callback_api";
+import axios from "axios";
+import redis from "redis";
+const client = redis.createClient();
 import { Logger } from "../logger/logger";
 import { responsesHelper } from "../utils/responses";
 const logging = new Logger();
 const logger = logging.log("screenshot-service");
 const CONN_URL = "amqp://localhost";
 declare const Buffer;
+client.on("error", function (error) {
+  console.error(error);
+});
 let ch: {
   assertQueue(queueName, {});
   consume(queue: string, callback: Function);
@@ -28,25 +34,34 @@ class ScreenShotWebsite {
 
   async screenshot(req: Request, res: Response) {
     try {
-      const queue = "screenshot-messages";
-      const recieveQueue = "recieve-screenshot";
-      const payload = JSON.stringify(req.body);
-      ch.assertQueue(queue, {
-        durable: true,
-      });
-      const response = ch.sendToQueue(queue, Buffer.from(payload), {
-        persistent: true,
-      });
-      logger.info(`payload => ${JSON.stringify(req.body)}`);
-      ch.consume(recieveQueue, async function (msg) {
-        const { uri } = JSON.parse(msg.content.toString());
-        if (response)
-          return res
-            .status(201)
-            .send(responsesHelper.success(201, { data: uri }, "success"));
-        return res
-          .status(400)
-          .send(responsesHelper.error(400, "Request not resolved"));
+      const { websiteName } = req.body;
+      // Typescript does not support Bluebird promisifyAll so I have to use callback.
+      client.exists(websiteName, async (err, found) => {
+        if (err) return res.status(400).send({ message: "something is wrong" });
+        if (found === 1) {
+          client.get(websiteName, (err, value) => {
+            if (err) throw new Error(err);
+            logger.info(JSON.parse(value));
+            return res
+              .status(200)
+              .send({ message: "data found", data: JSON.parse(value) });
+          });
+        } else {
+          const queue = "screenshot-messages";
+          const payload = JSON.stringify(req.body);
+          ch.assertQueue(queue, {
+            durable: true,
+          });
+          ch.sendToQueue(queue, Buffer.from(payload), {
+            persistent: true,
+          });
+          logger.info(`payload ${JSON.stringify(req.body)}`);
+          const { data, message } = await axios.get(
+            `${process.env.RECEIEVER_BASEURL}/api/screenshot/response`
+          );
+          logger.info(JSON.stringify({ message, data }));
+          return res.status(200).send({ message, data });
+        }
       });
     } catch (error) {
       console.log(error);
