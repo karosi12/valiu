@@ -9,6 +9,16 @@ A microservice that takes screenshot of a website given its URL and returns the 
 - amqplib(Rabbitmq)
 - Libaries: Es6, Babel, eslint, supertest, express
 
+# env sample
+
+- PORT=3300
+- NODE_ENV=
+- ACCESS_KEYID=
+- SECRET_ACCESS_KEY=
+- SPACE_ENDPOINT=
+- BUCKET=
+- UPLOAD_URI={baseuri}/api/upload
+
 # Features
 
 - User can get a screenshot image url of a website

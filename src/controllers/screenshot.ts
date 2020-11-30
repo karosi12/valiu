@@ -57,7 +57,7 @@ class ScreenShotWebsite {
           });
           logger.info(`payload ${JSON.stringify(req.body)}`);
           const { data, message } = await axios.get(
-            `${process.env.RECEIEVER_BASEURL}/api/screenshot/response`
+            `${process.env.RECEIVER_BASEURL}/api/screenshot/response`
           );
           logger.info(JSON.stringify({ message, data }));
           return res.status(200).send({ message, data });
