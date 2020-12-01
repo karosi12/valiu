@@ -8,7 +8,7 @@ describe("#POST Screenshot", function () {
     try {
       const payload = {
         websiteName: "twitter",
-        url: "https://twitter.com",
+        uri: "https://twitter.com",
       };
       const res = await request(app)
         .post("/api/v1/screenshot")
@@ -19,7 +19,8 @@ describe("#POST Screenshot", function () {
       expect(res.body).have.property("message");
       expect(res.body).have.property("errorCode");
       expect(res.body).have.property("data");
-      expect(res.body.data).have.property("data");
+      expect(res.body.data).have.property("uri");
+      expect(res.body.data).have.property("websiteName");
     } catch (error) {
       throw new Error(error);
     }

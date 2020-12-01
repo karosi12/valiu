@@ -41,10 +41,12 @@ class ScreenShotWebsite {
         if (found === 1) {
           client.get(websiteName, (err, value) => {
             if (err) throw new Error(err);
-            logger.info(JSON.parse(value));
+            logger.info(JSON.stringify(JSON.parse(value)));
             return res
-              .status(200)
-              .send({ message: "data found", data: JSON.parse(value) });
+              .status(201)
+              .send(
+                responsesHelper.success(201, JSON.parse(value), "data found")
+              );
           });
         } else {
           const queue = "screenshot-messages";
@@ -60,7 +62,9 @@ class ScreenShotWebsite {
             `${process.env.RECEIVER_BASEURL}/api/screenshot/response`
           );
           logger.info(JSON.stringify({ message, data }));
-          return res.status(200).send({ message, data });
+          return res
+            .status(201)
+            .send(responsesHelper.success(201, data, "data found"));
         }
       });
     } catch (error) {
