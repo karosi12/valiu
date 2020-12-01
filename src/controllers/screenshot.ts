@@ -17,11 +17,13 @@ let ch: {
   consume(queue: string, callback: Function);
   sendToQueue(queueName, payload, {});
 };
+
 amqp.connect(CONN_URL, function (err, conn) {
   conn.createChannel(function (err, channel) {
     ch = channel;
   });
 });
+
 class ScreenShotWebsite {
   /**
    * create
@@ -35,36 +37,40 @@ class ScreenShotWebsite {
   async screenshot(req: Request, res: Response) {
     try {
       const { websiteName } = req.body;
+      const queue = "screenshot-messages";
+      await ch.assertQueue(queue, { durable: true });
+      // console.log(ch);
       // Typescript does not support Bluebird promisifyAll so I have to use callback.
       client.exists(websiteName, async (err, found) => {
         if (err) return res.status(400).send({ message: "something is wrong" });
         if (found === 1) {
           client.get(websiteName, (err, value) => {
             if (err) throw new Error(err);
-            logger.info(JSON.parse(value));
+            logger.info(JSON.stringify(JSON.parse(value)));
+            const data = JSON.parse(value);
+            console.log(data);
             return res
-              .status(200)
-              .send({ message: "data found", data: JSON.parse(value) });
+              .status(201)
+              .send(responsesHelper.success(201, data, "data created"));
           });
         } else {
-          const queue = "screenshot-messages";
           const payload = JSON.stringify(req.body);
-          ch.assertQueue(queue, {
-            durable: true,
-          });
           ch.sendToQueue(queue, Buffer.from(payload), {
             persistent: true,
           });
           logger.info(`payload ${JSON.stringify(req.body)}`);
-          const { data, message } = await axios.get(
-            `${process.env.RECEIEVER_BASEURL}/api/screenshot/response`
+          const { data } = await axios.get(
+            `${process.env.RECEIVER_BASEURL}/api/screenshot/response`
           );
-          logger.info(JSON.stringify({ message, data }));
-          return res.status(200).send({ message, data });
+          logger.info(
+            JSON.stringify({ data: data.data, message: data.message })
+          );
+          return res
+            .status(201)
+            .send(responsesHelper.success(201, data.data, "data created"));
         }
       });
     } catch (error) {
-      console.log(error);
       logger.error(`error occured unable to capture ${JSON.stringify(error)}`);
       return res.status(500).send(responsesHelper.error(500, `${error}`));
     }
